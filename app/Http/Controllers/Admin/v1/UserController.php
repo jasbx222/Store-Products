@@ -12,6 +12,13 @@ use Illuminate\Http\Request;
 class UserController extends Controller
 {
 
+
+    //create new user 
+
+    // public function register(RegisterRequest $request){
+
+    // }
+
     // تسجيل دخول اليوزر 
 // return user info with token 
    public function login(LoginRequest $request)

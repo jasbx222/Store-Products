@@ -1,12 +1,7 @@
 <?php
-
-
-
 namespace App\Http\Service\products;
-
+use App\Http\Resources\ProductResource;
 use App\Models\Product;
-
-use function PHPUnit\Framework\returnSelf;
 
 class ProductService
 {
@@ -14,17 +9,14 @@ class ProductService
     //get all products
     public function index()
     {
-        return response()->json(Product::all());
+        return ProductResource::collection(Product::all());
     }
 
     // get the product with the stores 
 
     public function show($product)
     {
-        return response()->json([
-            'products' => $product,
-            'store' => $product->stores
-        ]);
+        return new ProductResource($product);
     }
 
 
@@ -33,10 +25,8 @@ class ProductService
     public function store(array $data)
     {
 
-        $products = Product::create($data);
-        return  response()->json([
-            'product' => $products
-        ], 201);
+        $product = Product::create($data);
+       return new ProductResource($product);
     }
 
 
@@ -47,9 +37,7 @@ class ProductService
     public function update(array $data, $product)
     {
         $product->update($data);
-        return  response()->json([
-            'product' => $product
-        ], 201);
+       return new ProductResource($product);
     }
 
 

@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Store extends Model
 {
    
-    protected $fillable=[''];
+  
+protected $fillable = ['name', 'location'];
+
     protected $table ='stores';
 
    public function products()

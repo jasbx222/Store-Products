@@ -4,6 +4,7 @@
 
 namespace App\Http\Service\stores;
 
+use App\Http\Resources\StoreResource;
 use App\Models\Store;
 
 class StoreService
@@ -12,7 +13,7 @@ class StoreService
     //get all stores
     public function index()
     {
-        return response()->json(Store::all());
+        return  StoreResource::collection(Store::all());
     }
 
     // get the product with the stores 
@@ -20,8 +21,7 @@ class StoreService
     public function show($store)
     {
         return response()->json([
-            'store' => $store,
-            'products' => $store->products
+            'store' => new StoreResource($store)
         ]);
     }
 
@@ -32,9 +32,7 @@ class StoreService
     {
 
         $store = Store::create($data);
-        return  response()->json([
-            'store' => $store
-        ], 201);
+        return  new StoreResource($store);
     }
 
 
@@ -45,9 +43,7 @@ class StoreService
     public function update(array $data, $store)
     {
         $store->update($data);
-        return  response()->json([
-            'store' => $store
-        ], 201);
+        return  new StoreResource($store);
     }
 
 

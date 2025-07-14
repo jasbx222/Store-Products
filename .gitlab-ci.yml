@@ -1,0 +1,57 @@
+stages:
+  - prepare
+  - deploy
+
+cache:
+  paths:
+    - vendor/
+
+prepare:
+  stage: prepare
+  image: composer:latest
+  script:
+    - composer install --no-dev --optimize-autoloader
+  artifacts:
+    paths:
+      - vendor/
+      - bootstrap/cache/
+      - public/css/
+      - public/js/
+    exclude:
+      - vendor/bin/
+      - vendor/tests/
+      - bootstrap/cache/*.php
+    expire_in: 1 hour
+  only:
+    - main
+
+deploy_laravel:
+  stage: deploy
+  image: alpine
+  dependencies:
+    - prepare
+  before_script:
+    - apk add --no-cache rsync openssh-client
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+  script:
+    # إنشاء قائمة استثناء محسنة
+    - echo -e ".env\n.git\n.gitignore\n.gitlab-ci.yml\n*.sess\n*.log\n*.env.*\nstorage/\nbootstrap/cache/*.php" > exclude.txt
+    
+    - rsync -avz --checksum --exclude-from='exclude.txt' -e "ssh -p $SSH_PORT -o StrictHostKeyChecking=no" ./ $SSH_USER@$SERVER_IP:$DEPLOY_PATH
+
+    # أوامر ما بعد النشر المحسنة
+    - ssh -p $SSH_PORT $SSH_USER@$SERVER_IP "
+      cd $DEPLOY_PATH &&
+      [ -f .env ] || cp .env.example .env &&
+      php artisan config:clear &&
+      php artisan config:cache &&
+      php artisan route:clear &&
+      php artisan route:cache &&
+      php artisan view:clear &&
+           php artisan view:cache &&
+      ( [ -L public/storage ] || php artisan storage:link ) &&
+      php artisan migrate --force"
+  only:
+    - main

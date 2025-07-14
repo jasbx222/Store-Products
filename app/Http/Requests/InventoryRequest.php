@@ -25,7 +25,7 @@ class InventoryRequest extends FormRequest
 
             'product_id' => ['required', 'exists:products,id'],
             'store_id' => ['required', 'exists:stores,id'],
-            'quantity' => ['required', 'integer|min:0'],
+            'quantity' => ['required', 'integer'],
         ];
     }
 }
